@@ -4,6 +4,7 @@ on:
   schedule:
     - cron:  '0 0 * * *' # One run every day
   pull_request:
+  push:
 
 env:
   alire_index: ""
