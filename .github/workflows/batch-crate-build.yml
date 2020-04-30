@@ -1,0 +1,87 @@
+name: Crate Status
+
+on:
+  schedule:
+    - cron:  '0 0 * * *' # One run every day
+  pull_request:
+
+env:
+  alire_index: ""
+  # Empty index: test with master of community index
+  # Otherwise: test with particular commit/branch
+  # e.g.: index: "git+https://github.com/alire-project/alire-index@deadbeef"
+
+jobs:
+
+  build:
+    name: ${{ matrix.os }}
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: 
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        tag:
+          - centos-latest-community-2019
+          - community-current          
+          - debian-stable          
+          - ubuntu-lts
+        exclude: # inclusions don't allow to add arrays of values to a scenario
+          - os: macos-latest
+            tag: centos-latest-community-2019
+          - os: macos-latest
+            tag: community-current
+          - os: macos-latest
+            tag: debian-stable
+          - os: windows-latest
+            tag: centos-latest-community-2019
+          - os: windows-latest
+            tag: community-current
+          - os: windows-latest
+            tag: debian-stable
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+      with:
+       submodules: recursive
+
+    # Prepare test setup depending on platform
+
+    - name: Pull docker image (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: docker pull alire/gnat:${{ matrix.tag }}
+
+    - name: Set up GNAT toolchain (CE on Windows/MacOS)
+      if: matrix.os != 'ubuntu-latest'
+      uses: ada-actions/toolchain@dev
+      with:
+        distrib: community
+
+    # Perform the actual tests
+
+    - name: Run test script (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        SETUP_NAME: ${{ matrix.setup }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: >
+        docker run -v${PWD}:/alire -w /alire 
+        -e "SETUP_NAME=${{ matrix.tag}}"
+        -e "INDEX=${{ env.alire_index }}"
+        -e "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}"
+        -e GITHUB_ACTOR
+        -e GITHUB_REPOSITORY
+        -e GITHUB_SHA
+        alire/gnat:${{ matrix.setup }} ./test-script.sh
+
+    - name: Run test script (Windows/MacOS)
+      if: matrix.setup != 'ubuntu-latest'
+      run: ./test-script.sh
+      shell: bash
+      env:
+        SETUP_NAME: ${{ matrix.os }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
