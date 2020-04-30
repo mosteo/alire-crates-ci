@@ -14,7 +14,7 @@ env:
 jobs:
 
   build:
-    name: ${{ matrix.os }}
+    name: HOST:${{ matrix.os }} DOCK:${{ matrix.tag }}
 
     runs-on: ${{ matrix.os }}
 
@@ -66,7 +66,7 @@ jobs:
     - name: Run test script (Linux)
       if: matrix.os == 'ubuntu-latest'
       env:
-        SETUP_NAME: ${{ matrix.setup }}
+        SETUP_NAME: ${{ matrix.tag }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: >
         docker run -v${PWD}:/alire -w /alire 
@@ -76,7 +76,7 @@ jobs:
         -e GITHUB_ACTOR
         -e GITHUB_REPOSITORY
         -e GITHUB_SHA
-        alire/gnat:${{ matrix.setup }} ./test-script.sh
+        alire/gnat:${{ matrix.tag }} ./test-script.sh
 
     - name: Run test script (Windows/MacOS)
       if: matrix.setup != 'ubuntu-latest'

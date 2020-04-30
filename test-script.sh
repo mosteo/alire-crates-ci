@@ -13,6 +13,7 @@ set -o nounset
 git clone --recurse-submodules https://github.com/alire-project/alire
 pushd alire
 commit=`git log --pretty=oneline -1 | cut -c1-8`
+[[ "$OSTYPE" =~ darwin.* ]] && export OS=macOS
 gprbuild -j0 -p -P alr_env
 export PATH+=:`pwd`/bin
 popd
@@ -40,7 +41,7 @@ fi
 # only do so at a specific minute. The root of this problem is at GH not
 # allowing using "needs:" on matrix jobs.
 
-declare -A minute=(['centos-latest-community-2019']='0'
+declare -A minute=(['centos-latest-community-latest']='0'
                    ['community-current']='1'
                    ['debian-stable']='2'
                    ['ubuntu-lts']='3'
