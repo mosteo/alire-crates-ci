@@ -1,9 +1,6 @@
 name: CI Windows
 
 on:
-  schedule:
-    - cron:  '0 0 * * *' # One run every day
-  push:
   pull_request:
 
 env:
