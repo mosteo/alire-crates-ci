@@ -1,9 +1,9 @@
 name: Crate Status
 
 on:
-  schedule:
-    - cron:  '0 0 * * *' # One run every day
-  push:
+#  schedule:
+#    - cron:  '0 0 * * *' # One run every day
+  push: [ fake ]
 
 env:
   alire_index: ""
